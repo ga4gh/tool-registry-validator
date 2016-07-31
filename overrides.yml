@@ -1,0 +1,12 @@
+$namespaces:
+  toolreg: http://toolreg.org/schemas/tool-registry-schemas#
+_documentRoot: Tool
+dockerfile: toolreg:dockerfile
+id: toolreg:id
+name: toolreg:name
+url: "@id"
+description: toolreg:description
+meta-version: toolreg:meta-version
+verified: toolreg:verified
+verified-source: toolreg:verified-source
+descriptor: toolreg:descriptor

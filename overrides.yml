@@ -1,5 +1,5 @@
 $namespaces:
-  toolreg: http://toolreg.org/schemas/tool-registry-schemas#
+  toolreg: http://ga4gh.org/schemas/tool-registry-schemas#
 _documentRoot: Tool
 dockerfile: toolreg:dockerfile
 id: toolreg:id

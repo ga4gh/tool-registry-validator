@@ -9,7 +9,11 @@ import requests
 from schema_salad.schema import load_schema, validate_doc
 from schema_salad import jsonld_context
 from schema_salad.main import printrdf
+
 from cwltool.load_tool import validate_document
+
+from rdflib import Graph, URIRef, Literal, Namespace
+from rdflib.namespace import Namespace
 
 def dockstore_fixup(r):
     if isinstance(r, list):
@@ -36,6 +40,7 @@ def dockstore_fixup(r):
             dockstore_fixup(d)
 
 def expand_cwl(cwl, uri, g):
+    return
     document_loader = Loader({"cwl": "https://w3id.org/cwl/cwl#", "id": "@id"})
     cwl = yaml.load(cwl)
     document_loader, avsc_names, processobj, metadata, uri = validate_document(
@@ -74,6 +79,12 @@ def main():
 
     sys.stderr.write("API returned valid response\n")
 
+    toolreg = Namespace("http://ga4gh.org/schemas/tool-registry-schemas#")
+    td =      Namespace("http://ga4gh.org/schemas/tool-registry-schemas#ToolDescriptor/")
+
     if args.print_rdf:
         g = jsonld_context.makerdf(args.url, r, schema_ctx)
+        for s, _, o in g.triples((None, td["type"], Literal("CWL"))):
+            for _, _, d in g.triples((s, toolreg["descriptor"], None)):
+                expand_cwl(d, unicode(s), g)
         print(g.serialize(format="turtle"))

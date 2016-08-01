@@ -76,7 +76,7 @@ def main():
     sld["$base"] = "http://ga4gh.org/schemas/tool-registry-schemas"
     sld["name"] = "file://" + os.path.realpath(args.swagger)
 
-    document_loader, avsc_names, schema_metadata, metaschema_loader, schema_ctx = load_schema(sld)
+    document_loader, avsc_names, schema_metadata, metaschema_loader = load_schema(sld)
 
     txt = document_loader.fetch_text(urlparse.urljoin("file://" + os.getcwd()+"/", args.url))
     r = yaml.load(txt)
@@ -92,7 +92,7 @@ def main():
     td =      Namespace("http://ga4gh.org/schemas/tool-registry-schemas#ToolDescriptor/")
 
     if args.print_rdf or args.serve:
-        g = jsonld_context.makerdf(args.url, r, schema_ctx)
+        g = jsonld_context.makerdf(args.url, r, document_loader.ctx)
         for s, _, o in g.triples((None, td["type"], Literal("CWL"))):
             for _, _, d in g.triples((s, toolreg["descriptor"], None)):
                 expand_cwl(d, unicode(s), g)

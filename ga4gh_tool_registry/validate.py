@@ -9,6 +9,7 @@ import requests
 from schema_salad.schema import load_schema, validate_doc
 from schema_salad import jsonld_context
 from schema_salad.main import printrdf
+from schema_salad.ref_resolver import Loader
 
 from cwltool.load_tool import validate_document
 
@@ -40,17 +41,21 @@ def dockstore_fixup(r):
             dockstore_fixup(d)
 
 def expand_cwl(cwl, uri, g):
-    return
-    document_loader = Loader({"cwl": "https://w3id.org/cwl/cwl#", "id": "@id"})
-    cwl = yaml.load(cwl)
-    document_loader, avsc_names, processobj, metadata, uri = validate_document(
-        document_loader, cwl, uri)
+    try:
+        document_loader = Loader({"cwl": "https://w3id.org/cwl/cwl#", "id": "@id"})
+        cwl = yaml.load(cwl)
+        document_loader, avsc_names, processobj, metadata, uri = validate_document(
+            document_loader, cwl, uri, strict=False)
+        jsonld_context.makerdf(uri, processobj, document_loader.ctx, graph=g)
+        sys.stderr.write("\n%s: imported ok\n" % (uri))
+    except Exception as e:
+        sys.stderr.write("\n%s: %s\n" % (uri, e))
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("swagger")
-    parser.add_argument("overrides")
+    parser.add_argument("annotations")
     parser.add_argument("url")
 
     parser.add_argument("--dockstore-fixup", action="store_true", default=False)
@@ -58,11 +63,11 @@ def main():
 
     args = parser.parse_args()
 
-    with open(args.overrides) as f2:
-        overrides = yaml.load(f2)
+    with open(args.annotations) as f2:
+        annotations = yaml.load(f2)
 
     with open(args.swagger) as f:
-        sld = swg2salad.swg2salad(yaml.load(f), overrides)
+        sld = swg2salad.swg2salad(yaml.load(f), annotations)
 
     sld["$base"] = "http://ga4gh.org/schemas/tool-registry-schemas"
     sld["name"] = "file://" + os.path.realpath(args.swagger)

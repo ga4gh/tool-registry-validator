@@ -1,11 +1,12 @@
 $namespaces:
   toolreg: http://ga4gh.org/schemas/tool-registry-schemas#
+  rdfs: "http://www.w3.org/2000/01/rdf-schema#"
 _documentRoot: Tool
 dockerfile: toolreg:dockerfile
 id: toolreg:id
 name: toolreg:name
 url: "@id"
-description: toolreg:description
+description: rdfs:comment
 meta-version: toolreg:meta-version
 verified: toolreg:verified
 verified-source: toolreg:verified-source

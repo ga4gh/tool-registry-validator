@@ -1,19 +1,27 @@
 # GA4GH Tool Registry API schema validator
 
-Installation:
+## Installation:
 
 ```
 $ python setup.py install
 ```
 
-Running the validator:
+## Validate tool registry response:
 
 ```
 $ ga4gh-tool-registry-validate ../tool-registry-schemas/src/main/resources/swagger/ga4gh-tool-discovery.yaml annotations.yml https://www.dockstore.org:8443/api/v1/tools
 ```
 
-Convert the tool registry response to RDF:
+## Convert a tool registry response to RDF:
 
 ```
 $ ga4gh-tool-registry-validate --print-rdf ../tool-registry-schemas/src/main/resources/swagger/ga4gh-tool-discovery.yaml annotations.yml https://www.dockstore.org:8443/api/v1/tools > tools.ttl
+```
+
+## Index a tool registry for SPARQL query
+
+Requires Apache Fuseki: https://jena.apache.org/documentation/fuseki2/#download-fuseki
+
+```
+$ ga4gh-tool-registry-validate --serve --fuseki-path=../apache-jena-fuseki-2.3.0 ../tool-registry-schemas/src/main/resources/swagger/ga4gh-tool-discovery.yaml annotations.yml https://www.dockstore.org:8443/api/v1/tools
 ```

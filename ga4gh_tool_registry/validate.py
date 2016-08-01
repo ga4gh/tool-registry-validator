@@ -2,6 +2,8 @@ import argparse
 import sys
 import os
 import urlparse
+import subprocess
+import tempfile
 
 from . import swg2salad
 import ruamel.yaml as yaml
@@ -60,6 +62,8 @@ def main():
 
     parser.add_argument("--dockstore-fixup", action="store_true", default=False)
     parser.add_argument("--print-rdf", action="store_true", default=False)
+    parser.add_argument("--serve", action="store_true", default=False)
+    parser.add_argument("--fuseki-path", type=str, default=".")
 
     args = parser.parse_args()
 
@@ -87,9 +91,17 @@ def main():
     toolreg = Namespace("http://ga4gh.org/schemas/tool-registry-schemas#")
     td =      Namespace("http://ga4gh.org/schemas/tool-registry-schemas#ToolDescriptor/")
 
-    if args.print_rdf:
+    if args.print_rdf or args.serve:
         g = jsonld_context.makerdf(args.url, r, schema_ctx)
         for s, _, o in g.triples((None, td["type"], Literal("CWL"))):
             for _, _, d in g.triples((s, toolreg["descriptor"], None)):
                 expand_cwl(d, unicode(s), g)
+
+    if args.print_rdf:
         print(g.serialize(format="turtle"))
+
+    if args.serve:
+        t = tempfile.NamedTemporaryFile(suffix=".ttl")
+        g.serialize(t, format="turtle")
+        t.flush()
+        subprocess.check_call(["./fuseki-server", "--file="+t.name, "/tools"], cwd=args.fuseki_path)

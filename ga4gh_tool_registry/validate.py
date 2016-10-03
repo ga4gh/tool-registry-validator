@@ -18,30 +18,6 @@ from cwltool.load_tool import validate_document
 from rdflib import Graph, URIRef, Literal, Namespace
 from rdflib.namespace import Namespace
 
-def dockstore_fixup(r):
-    if isinstance(r, list):
-        for d in r:
-            dockstore_fixup(d)
-    elif isinstance(r, dict):
-        if 'id' in r and r['id'] is None:
-            r['id'] = ''
-
-        if 'author' in r and r['author'] is None:
-            r['author'] = ''
-
-        if 'descriptor' in r and r['descriptor'] is None:
-            if 'dockerfile' in r:
-                r['descriptor'] = {"descriptor": "", "type": ""}
-            else:
-                r['descriptor'] = ''
-
-        if 'tooltype' in r:
-            r["toolclass"] = r['tooltype']
-            del r['tooltype']
-
-        for d in r.values():
-            dockstore_fixup(d)
-
 def expand_cwl(cwl, uri, g):
     try:
         document_loader = Loader({"cwl": "https://w3id.org/cwl/cwl#", "id": "@id"})
@@ -60,7 +36,6 @@ def main():
     parser.add_argument("annotations")
     parser.add_argument("url")
 
-    parser.add_argument("--dockstore-fixup", action="store_true", default=False)
     parser.add_argument("--print-rdf", action="store_true", default=False)
     parser.add_argument("--serve", action="store_true", default=False)
     parser.add_argument("--fuseki-path", type=str, default=".")
@@ -80,9 +55,6 @@ def main():
 
     txt = document_loader.fetch_text(urlparse.urljoin("file://" + os.getcwd()+"/", args.url))
     r = yaml.load(txt)
-
-    if args.dockstore_fixup:
-        dockstore_fixup(r)
 
     validate_doc(avsc_names, r, document_loader, True)
 

@@ -7,11 +7,14 @@ import tempfile
 
 from . import swg2salad
 import ruamel.yaml as yaml
+import warnings as warnings
 import requests
 from schema_salad.schema import load_schema, validate_doc
 from schema_salad import jsonld_context
 from schema_salad.main import printrdf
+from schema_salad.sourceline import cmap
 from schema_salad.ref_resolver import Loader
+from ruamel.yaml.comments import CommentedSeq, CommentedMap
 
 from cwltool.load_tool import validate_document
 
@@ -41,6 +44,8 @@ def main():
     parser.add_argument("--fuseki-path", type=str, default=".")
 
     args = parser.parse_args()
+    warnings.simplefilter('ignore', yaml.error.UnsafeLoaderWarning)
+
 
     with open(args.annotations) as f2:
         annotations = yaml.load(f2)
@@ -51,7 +56,7 @@ def main():
     sld["$base"] = "http://ga4gh.org/schemas/tool-registry-schemas"
     sld["name"] = "file://" + os.path.realpath(args.swagger)
 
-    document_loader, avsc_names, schema_metadata, metaschema_loader = load_schema(sld)
+    document_loader, avsc_names, schema_metadata, metaschema_loader = load_schema(cmap(sld))
 
     txt = document_loader.fetch_text(urlparse.urljoin("file://" + os.getcwd()+"/", args.url))
     r = yaml.load(txt)

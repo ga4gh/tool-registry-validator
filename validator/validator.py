@@ -1,6 +1,5 @@
 from io import BytesIO
-
-import os
+from subprocess import Popen, PIPE
 
 import requests
 from flask import Flask, send_file, request
@@ -16,15 +15,17 @@ def hello_world():
 
 
 def _compute_badge(url):
-    os.system('ga4gh-tool-registry-validate ga4gh-tool-discovery.yaml annotations.yml ' + url)
-    if url == 'dockstore':
-        return passing_badge()
-    if url == 'warning':
-        return warning_badge()
-    if url == 'error':
+    process = Popen(['ga4gh-tool-registry-validate ga4gh-tool-discovery.yaml annotations.yml ' + url], stdout=PIPE, stderr=PIPE, shell=True)
+    (out, err) = process.communicate()
+    if err != 'API returned valid response\n':
         return error_badge()
     else:
-        return failing_badge()
+        if url == 'failing':
+            return failing_badge()
+        if url == 'warning':
+            return warning_badge()
+        else:
+            return passing_badge()
 
 
 @app.route('/trs/validator', methods=['GET'])

@@ -44,21 +44,24 @@ def main():
     parser.add_argument("--fuseki-path", type=str, default=".")
 
     args = parser.parse_args()
+    validate(args.swagger, args.annotations, args.url, args.print_rdf, args.serve, args.fuseki_path)
+
+
+def validate(swagger, annotations, url, print_rdf, serve, fuseki_path):
     warnings.simplefilter('ignore', yaml.error.UnsafeLoaderWarning)
 
-
-    with open(args.annotations) as f2:
+    with open(annotations) as f2:
         annotations = yaml.load(f2)
 
-    with open(args.swagger) as f:
+    with open(swagger) as f:
         sld = swg2salad.swg2salad(yaml.load(f), annotations)
 
     sld["$base"] = "http://ga4gh.org/schemas/tool-registry-schemas"
-    sld["name"] = "file://" + os.path.realpath(args.swagger)
+    sld["name"] = "file://" + os.path.realpath(swagger)
 
     document_loader, avsc_names, schema_metadata, metaschema_loader = load_schema(cmap(sld))
 
-    txt = document_loader.fetch_text(urlparse.urljoin("file://" + os.getcwd()+"/", args.url))
+    txt = document_loader.fetch_text(urlparse.urljoin("file://" + os.getcwd() + "/", url))
     r = yaml.load(txt)
 
     validate_doc(avsc_names, r, document_loader, True)
@@ -66,19 +69,19 @@ def main():
     sys.stderr.write("API returned valid response\n")
 
     toolreg = Namespace("http://ga4gh.org/schemas/tool-registry-schemas#")
-    td =      Namespace("http://ga4gh.org/schemas/tool-registry-schemas#ToolDescriptor/")
+    td = Namespace("http://ga4gh.org/schemas/tool-registry-schemas#ToolDescriptor/")
 
-    if args.print_rdf or args.serve:
-        g = jsonld_context.makerdf(args.url, r, document_loader.ctx)
+    if print_rdf or serve:
+        g = jsonld_context.makerdf(url, r, document_loader.ctx)
         for s, _, o in g.triples((None, td["type"], Literal("CWL"))):
             for _, _, d in g.triples((s, toolreg["descriptor"], None)):
                 expand_cwl(d, unicode(s), g)
 
-    if args.print_rdf:
+    if print_rdf:
         print(g.serialize(format="turtle"))
 
-    if args.serve:
+    if serve:
         t = tempfile.NamedTemporaryFile(suffix=".ttl")
         g.serialize(t, format="turtle")
         t.flush()
-        subprocess.check_call(["./fuseki-server", "--file="+t.name, "/tools"], cwd=args.fuseki_path)
+        subprocess.check_call(["./fuseki-server", "--file=" + t.name, "/tools"], cwd=fuseki_path)

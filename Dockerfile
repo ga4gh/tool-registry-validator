@@ -1,6 +1,16 @@
 FROM ubuntu:latest
 MAINTAINER Gary Luu "gary.luu@oicr.on.ca"
 RUN apt-get update -y
+# install node.js and npm
+RUN apt-get -qq update && apt-get install -y nodejs && apt-get install -y npm && ln -s /usr/bin/nodejs /usr/bin/node
+# install git
+RUN apt-get install git -y
+# install dredd 
+RUN npm install -g dredd
+# test versions 
+RUN node -v && \
+    npm -v && \
+    dredd --version
 RUN apt-get install -y python-pip python-dev build-essential
 COPY . /app
 WORKDIR /app

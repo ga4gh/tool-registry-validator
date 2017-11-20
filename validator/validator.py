@@ -20,13 +20,13 @@ def _compute_badge(url):
     #     return failing_badge()
     # else:
         (out2, err2) = run_dredd(SWAGGER, url)
-        if '0 failing, 0 errors' in out2:
+        if ' 0 failing, 0 errors' in out2:
             return passing_badge()
         else:
-            if '0 errors' not in out2:
+            if ' 0 errors' not in out2:
                 return error_badge()
             (out3, err3) = run_dredd(RELAXED_SWAGGER, url)
-            if '0 failing, 0 errors' in out3:
+            if ' 0 failing, 0 errors' in out3:
                 return warning_badge()
             else:
                 return failing_badge()
@@ -59,7 +59,7 @@ def validate(url):
 def run_dredd(swagger_filename, url):
     file_directory = os.path.dirname(__file__)
     swagger_file_path = os.path.join(file_directory, swagger_filename)
-    command_args = ['dredd', swagger_file_path, url]
+    command_args = ['dredd', swagger_file_path, url, '-l', 'fail']
     process = Popen(command_args, stdout=PIPE, stderr=PIPE)
     return process.communicate()
 

@@ -48,7 +48,7 @@ def remove_headers(properties):
 
 if __name__ == '__main__':
     fileDirectory = os.path.dirname(__file__)
-    swagger = os.path.join(fileDirectory, 'ga4gh-tool-discovery.yaml')
+    swagger = os.path.join(fileDirectory, constants.SWAGGER)
     warnings.simplefilter('ignore', yaml.error.UnsafeLoaderWarning)
     with open(swagger, 'r') as f:
         loaded = yaml.load(f)

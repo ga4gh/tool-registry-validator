@@ -10,7 +10,6 @@ headersToIgnore = ['next_page', 'current_offset']
 
 # Creating another YAML that is less strict than the original
 def create_warning_yaml(yaml_file):
-    remove_content_type(yaml_file)
     definitions = yaml_file.get('definitions')
     replace_with_nullable_types(definitions)
     remove_headers(yaml_file.get('paths'))
@@ -28,11 +27,6 @@ def replace_with_nullable_types(properties):
         else:
             if isinstance(properties.get(single_property), dict):
                 replace_with_nullable_types(properties.get(single_property))
-
-
-# Ignoring header content types for now
-def remove_content_type(yaml_file):
-    yaml_file.pop('produces', None)
 
 
 # Some headers are allowed to not exist when there are not enough tools to be displayed

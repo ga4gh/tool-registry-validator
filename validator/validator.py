@@ -3,7 +3,6 @@ from subprocess import Popen, PIPE
 import tempfile
 
 import os
-import sys
 import requests
 from flask import Flask, send_file, request, Response
 # import ga4gh_tool_registry.validate as validate
@@ -69,7 +68,8 @@ def validate(url):
 def run_dredd(swagger_filename, url):
     file_directory = os.path.dirname(__file__)
     swagger_file_path = os.path.join(file_directory, swagger_filename)
-    command_args = ['dredd', swagger_file_path, url, '-l', 'fail', '-c', 'false']
+    hooks_file_path = os.path.join(file_directory, 'hooks.py')
+    command_args = ['dredd', swagger_file_path, url, '-l', 'fail', '-c', 'false', '-a', 'python', '-f', hooks_file_path]
     outfile = tempfile.NamedTemporaryFile('w')
     process = Popen(command_args, stdout=outfile, stderr=PIPE)
     process.wait()
@@ -82,6 +82,4 @@ def _temp_file_to_string(file):
 
 
 if __name__ == '__main__':
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
     app.run(debug=True, host='0.0.0.0')

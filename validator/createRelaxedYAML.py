@@ -9,7 +9,7 @@ headersToIgnore = ['next_page', 'current_offset']
 
 
 # Creating another YAML that is less strict than the original
-def create_warning_yaml(yaml_file):
+def create_relaxed_yaml(yaml_file):
     definitions = yaml_file.get('definitions')
     replace_with_nullable_types(definitions)
     remove_headers(yaml_file.get('paths'))
@@ -46,4 +46,4 @@ if __name__ == '__main__':
     warnings.simplefilter('ignore', yaml.error.UnsafeLoaderWarning)
     with open(swagger, 'r') as f:
         loaded = yaml.load(f)
-        create_warning_yaml(loaded)
+        create_relaxed_yaml(loaded)

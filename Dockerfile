@@ -18,6 +18,7 @@ RUN git checkout feature/flask
 RUN python setup.py install
 RUN pip install -r validator/requirements.txt
 RUN wget https://raw.githubusercontent.com/ga4gh/tool-registry-schemas/feature/trsv_changes/src/main/resources/swagger/ga4gh-tool-discovery.yaml -P validator
+RUN python validator/createProcessedYAML.py
 RUN python validator/createRelaxedYAML.py
 ENTRYPOINT ["python"]
 CMD ["validator/validator.py"]

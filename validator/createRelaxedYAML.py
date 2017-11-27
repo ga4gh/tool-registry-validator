@@ -10,8 +10,8 @@ headersToIgnore = ['next_page', 'current_offset']
 
 # Creating another YAML that is less strict than the original
 def create_relaxed_yaml(yaml_file):
-    definitions = yaml_file.get('definitions')
-    replace_with_nullable_types(definitions)
+    # Removing external docs because it is not used and also because there's a warning for some reason
+    yaml_file.pop('externalDocs', None)
     remove_headers(yaml_file.get('paths'))
     file_directory = os.path.dirname(__file__)
     relaxed_swagger = os.path.join(file_directory, constants.RELAXED_SWAGGER)

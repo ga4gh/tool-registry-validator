@@ -1,6 +1,7 @@
 from io import BytesIO
 from subprocess import Popen, PIPE
 import tempfile
+from healthcheck import HealthCheck, EnvironmentDump
 
 import os
 import requests
@@ -12,6 +13,8 @@ from constants import RELAXED_SWAGGER, SWAGGER
 
 app = Flask(__name__)
 
+health = HealthCheck(app, "/healthcheck")
+envdump = EnvironmentDump(app, "/environment")
 
 def _compute_badge(url):
     # (out, err) = validate(url)

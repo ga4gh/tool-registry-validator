@@ -1,6 +1,8 @@
 from io import BytesIO
 from subprocess import Popen, PIPE
 import tempfile
+
+import re
 from healthcheck import HealthCheck, EnvironmentDump
 
 import os
@@ -23,13 +25,26 @@ def _compute_badge(url):
     # if err != 'API returned valid response\n':
     #     return failing_badge()
     # else:
-    out2 = run_dredd(SWAGGER, url)
+
+    file_url = re.sub(r'[^\w]', '', url.encode('utf8'))
+    relaxed_file_url = file_url+'-relaxed'
+    if os.path.isfile(file_url):
+        out2 = _filename_to_string(file_url)
+    else:
+        out2 = run_dredd(SWAGGER, url)
+        with open(file_url, 'w+') as warning_yaml_file:
+            warning_yaml_file.write(out2)
     if ' 0 failing, 0 errors' in out2:
         return passing_badge()
     else:
         if ' 0 errors' not in out2:
             return error_badge()
-        out3 = run_dredd(RELAXED_SWAGGER, url)
+        if os.path.isfile(relaxed_file_url):
+            out3 = _filename_to_string(relaxed_file_url)
+        else:
+            out3 = run_dredd(RELAXED_SWAGGER, url)
+            with open(relaxed_file_url, 'w+') as warning_yaml_file:
+                warning_yaml_file.write(out2)
         if ' 0 failing, 0 errors' in out3:
             return warning_badge()
         else:
@@ -81,6 +96,11 @@ def run_dredd(swagger_filename, url):
 
 def _temp_file_to_string(file):
     with open(file.name) as f:
+        return f.read()
+
+
+def _filename_to_string(filename):
+    with open(filename) as f:
         return f.read()
 
 

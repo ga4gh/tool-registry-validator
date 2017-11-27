@@ -2,7 +2,7 @@ FROM ubuntu:latest
 MAINTAINER Gary Luu "gary.luu@oicr.on.ca"
 RUN apt-get update -y
 # install node.js and npm
-RUN apt-get -qq update && apt-get install -y wget nodejs && apt-get install -y npm && ln -s /usr/bin/nodejs /usr/bin/node
+RUN apt-get -qq update && apt-get install -y nodejs && apt-get install -y npm && ln -s /usr/bin/nodejs /usr/bin/node
 # install git
 RUN apt-get install git -y
 # install dredd 
@@ -18,7 +18,7 @@ WORKDIR tool-registry-validator
 RUN git checkout feature/flask
 RUN python setup.py install
 RUN pip install -r validator/requirements.txt
-ADD https://raw.githubusercontent.com/ga4gh/tool-registry-schemas/feature/trsv_changes/src/main/resources/swagger/ga4gh-tool-discovery.yaml validator
+COPY ga4gh-tool-discovery.yaml validator
 RUN python validator/createProcessedYAML.py
 RUN python validator/createRelaxedYAML.py
 ENTRYPOINT ["python"]

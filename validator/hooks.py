@@ -31,6 +31,11 @@ def add_path_parameter_values(transaction):
         transaction['fullPath'] = transaction['fullPath'].replace(DEFAULT_TYPE, NEW_TYPE)
         transaction['fullPath'] = transaction['fullPath'].replace(DEFAULT_RELATIVE_PATH, '%2Fsequenza.cwl')
         transaction['fullPath'] = transaction['fullPath'].replace(DEFAULT_ID, NEW_ID)
+    else:
+        # If there are no defined parameters but there's a path parameter, skip test.
+        # Validator will notice this skipped test and output a warning badge instead.
+        if '_placeholder' in transaction['fullPath']:
+            transaction['skip'] = True
 
 
 @before_each_validation

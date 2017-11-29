@@ -9,6 +9,11 @@ global_issues = []
 
 
 def compare_definitions(yaml1, yaml2):
+    """ Compares two swagger yaml files to see if they are roughly equivalent
+
+    :param yaml1: The original yaml file
+    :param yaml2: The generated yaml file which is generated from the protobuf
+    """
     definitions1 = yaml1.get('definitions')
     definitions2 = yaml2.get('definitions')
     rename_title_to_definition(definitions2)
@@ -27,6 +32,12 @@ def compare_definitions(yaml1, yaml2):
 
 
 def rename_title_to_definition(definitions2):
+    """
+    Openapi2swagger generates comments as description instead of title.
+    This fixes the generated swagger yaml to match the original.
+
+    :param definitions2: The generated swagger yaml's definitions
+    """
     for definition in definitions2.keys():
         if definition == 'title':
             definitions2['description'] = definitions2.pop('title')
@@ -36,6 +47,13 @@ def rename_title_to_definition(definitions2):
 
 
 def compare_definition(definition1, definition2, real_definition1, real_definition2):
+    """ Recursively compares the definitions between the two swagger yaml and all of its children
+
+    :param definition1: The original swagger yaml's definition or a child of its definition
+    :param definition2: The generated swagger yaml's definition or a child of its definition
+    :param real_definition1: The original swagger yaml's definition
+    :param real_definition2: The generated swagger yaml's definition
+    """
     added, removed, modified, same = dict_compare(definition2, definition1)
     global global_issues
     if removed:
@@ -70,6 +88,11 @@ def compare_definition(definition1, definition2, real_definition1, real_definiti
 
 
 def handle_error(problem_property, problem):
+    """ Handles the event where a property is missing or modified by printing
+
+    :param problem_property: The property that is missing or modified
+    :param problem: Whether it was missing or modified
+    """
     message = problem + ' property: ' + problem_property
     print >> sys.stderr, message
     global global_issues
@@ -77,6 +100,11 @@ def handle_error(problem_property, problem):
 
 
 def compare_paths(yaml1, yaml2):
+    """ Compares the 'paths' between two yaml files to see if there's any missing endpoints
+
+    :param yaml1:
+    :param yaml2:
+    """
     paths1 = yaml1.get('paths')
     paths2 = yaml2.get('paths')
 
@@ -88,6 +116,12 @@ def compare_paths(yaml1, yaml2):
 
 
 def dict_compare(d1, d2):
+    """ Compares two dictionaries to see what's missing, new, modified, and same
+
+    :param d1: First dictionary to compare
+    :param d2: Second dictionary to compare
+    :return:
+    """
     d1_keys = set(d1.keys())
     d2_keys = set(d2.keys())
     intersect_keys = d1_keys.intersection(d2_keys)
@@ -98,10 +132,10 @@ def dict_compare(d1, d2):
     return added, removed, modified, same
 
 
-if __name__ == '__main__':
-    fileDirectory = os.path.dirname(__file__)
-    original_swagger = os.path.join(fileDirectory, constants.SWAGGER)
-    generated_swagger = os.path.join(fileDirectory, constants.GENERATED_SWAGGER)
+def main():
+    file_directory = os.path.dirname(__file__)
+    original_swagger = os.path.join(file_directory, constants.SWAGGER)
+    generated_swagger = os.path.join(file_directory, constants.GENERATED_SWAGGER)
     warnings.simplefilter('ignore', yaml.error.UnsafeLoaderWarning)
     with open(original_swagger, 'r') as f1:
         with open(generated_swagger, 'r') as f2:
@@ -111,3 +145,7 @@ if __name__ == '__main__':
             compare_definitions(loaded1, loaded2)
             if len(global_issues) != 0:
                 sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()

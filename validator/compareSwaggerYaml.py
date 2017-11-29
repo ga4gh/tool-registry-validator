@@ -134,8 +134,12 @@ def dict_compare(d1, d2):
 
 def main():
     file_directory = os.path.dirname(__file__)
-    original_swagger = os.path.join(file_directory, constants.SWAGGER)
-    generated_swagger = os.path.join(file_directory, constants.GENERATED_SWAGGER)
+    if len(sys.argv) == 3:
+        original_swagger = sys.argv[1]
+        generated_swagger = sys.argv[2]
+    else:
+        original_swagger = os.path.join(file_directory, constants.SWAGGER)
+        generated_swagger = os.path.join(file_directory, constants.GENERATED_SWAGGER)
     warnings.simplefilter('ignore', yaml.error.UnsafeLoaderWarning)
     with open(original_swagger, 'r') as f1:
         with open(generated_swagger, 'r') as f2:

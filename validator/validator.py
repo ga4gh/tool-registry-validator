@@ -4,7 +4,7 @@ import tempfile
 
 import re
 from healthcheck import HealthCheck, EnvironmentDump
-
+import time
 import os
 import requests
 from flask import Flask, send_file, request, Response
@@ -33,14 +33,26 @@ def _compute_badge(url):
     :param url: The url the validator is testing
     :return: A badge determined by the test status
     """
+    out2 = _get_dredd_log(url)
+    return _badge_from_output(out2)
+
+
+def _get_dredd_log(url):
+    """
+    This gets the Dredd validation output.
+    This can be either a new Dredd validation run or an old one.
+    :param url: The url to test
+    :return: The Dredd validation output
+    """
     file_url = re.sub(r'[^\w]', '', url.encode('utf8'))
-    if os.path.isfile(file_url):
+    # if there is a log file and it was created in the last 5 mins (300 seconds)
+    if os.path.isfile(file_url) and time.time() - os.path.getmtime(file_url) < 300:
         out2 = _filename_to_string(file_url)
     else:
         out2 = run_dredd(SWAGGER, url)
         with open(file_url, 'w+') as warning_yaml_file:
             warning_yaml_file.write(out2)
-    return _badge_from_output(out2)
+    return out2
 
 
 def _badge_from_output(output):
@@ -78,7 +90,7 @@ def debug():
     :return:
     """
     url = request.args.get('url', '')
-    r = run_dredd(SWAGGER, url)
+    r = _get_dredd_log(url)
     response = Response(r, mimetype="text/plain")
     return response
 

@@ -4,15 +4,30 @@ import warnings as warnings
 
 import constants
 
+headersToIgnore = ['next_page', 'current_offset']
+
 
 # Creating another YAML that is less strict than the original
 def create_processed_yaml(yaml_file):
+    yaml_file.pop('externalDocs', None)
     paths = yaml_file.get('paths')
+    remove_headers(paths)
     append_x_example(paths)
     file_directory = os.path.dirname(__file__)
     relaxed_swagger = os.path.join(file_directory, constants.SWAGGER)
     with open(relaxed_swagger, 'w') as warning_yaml_file:
         yaml.dump(yaml_file, warning_yaml_file, allow_unicode=True)
+
+
+# Some headers are allowed to not exist when there are not enough tools to be displayed
+def remove_headers(properties):
+    for single_property in properties.keys():
+        if single_property in headersToIgnore:
+            for header in headersToIgnore:
+                properties.pop(header, None)
+        else:
+            if isinstance(properties.get(single_property), dict):
+                remove_headers(properties.get(single_property))
 
 
 def append_x_example(paths):

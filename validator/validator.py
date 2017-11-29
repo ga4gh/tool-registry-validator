@@ -11,12 +11,13 @@ from flask import Flask, send_file, request, Response
 # import ga4gh_tool_registry.validate as validate
 
 from badge import passing_badge, failing_badge, warning_badge, error_badge
-from constants import RELAXED_SWAGGER, SWAGGER
+from constants import SWAGGER, EXPECTED_PASSING_TESTS
 
 app = Flask(__name__)
 
-health = HealthCheck(app, "/healthcheck")
+health = HealthCheck(app, "/health_check")
 envdump = EnvironmentDump(app, "/environment")
+
 
 def _compute_badge(url):
     # (out, err) = validate(url)
@@ -27,28 +28,24 @@ def _compute_badge(url):
     # else:
 
     file_url = re.sub(r'[^\w]', '', url.encode('utf8'))
-    relaxed_file_url = file_url+'-relaxed'
     if os.path.isfile(file_url):
         out2 = _filename_to_string(file_url)
     else:
         out2 = run_dredd(SWAGGER, url)
         with open(file_url, 'w+') as warning_yaml_file:
             warning_yaml_file.write(out2)
-    if ' 0 failing, 0 errors' in out2:
+    return _badge_from_output(out2)
+
+
+def _badge_from_output(output):
+    if ' 0 errors' not in output:
+        return error_badge()
+    if ' 0 failing' not in output:
+        return failing_badge()
+    if str(EXPECTED_PASSING_TESTS) + ' passing' not in output:
+        return warning_badge()
+    if ' 0 failing, 0 errors' in output:
         return passing_badge()
-    else:
-        if ' 0 errors' not in out2:
-            return error_badge()
-        if os.path.isfile(relaxed_file_url):
-            out3 = _filename_to_string(relaxed_file_url)
-        else:
-            out3 = run_dredd(RELAXED_SWAGGER, url)
-            with open(relaxed_file_url, 'w+') as warning_yaml_file:
-                warning_yaml_file.write(out2)
-        if ' 0 failing, 0 errors' in out3:
-            return warning_badge()
-        else:
-            return failing_badge()
 
 
 @app.route('/trs/validator', methods=['GET'])
@@ -66,18 +63,10 @@ def debug():
     return response
 
 
-@app.route('/trs/validator/debug2', methods=['GET'])
-def debug2():
-    url = request.args.get('url', '')
-    r = run_dredd(RELAXED_SWAGGER, url)
-    response = Response(r, mimetype="text/plain")
-    return response
-
-
 def validate(url):
     # validate.validate('ga4gh-tool-discovery.yaml', 'annotations.yml', url, False, False, False)
     file_directory = os.path.dirname(__file__)
-    swagger_file_path = os.path.join(file_directory, RELAXED_SWAGGER)
+    swagger_file_path = os.path.join(file_directory, SWAGGER)
     command_args = ['ga4gh-tool-registry-validate', swagger_file_path, 'annotations.yml', url + '/tools']
     process = Popen(command_args, stdout=PIPE, stderr=PIPE)
     return process.communicate()
@@ -91,12 +80,7 @@ def run_dredd(swagger_filename, url):
     outfile = tempfile.NamedTemporaryFile('w')
     process = Popen(command_args, stdout=outfile, stderr=PIPE)
     process.wait()
-    return _temp_file_to_string(outfile)
-
-
-def _temp_file_to_string(file):
-    with open(file.name) as f:
-        return f.read()
+    return _filename_to_string(outfile.name)
 
 
 def _filename_to_string(filename):

@@ -40,10 +40,15 @@ def append_x_example(paths):
                     parameter['x-example'] = parameter.get('name') + '_placeholder'
 
 
-if __name__ == '__main__':
+def main():
     fileDirectory = os.path.dirname(__file__)
     swagger = os.path.join(fileDirectory, constants.PREPROCESSED_SWAGGER)
     warnings.simplefilter('ignore', yaml.error.UnsafeLoaderWarning)
     with open(swagger, 'r') as f:
         loaded = yaml.load(f)
         create_processed_yaml(loaded)
+
+
+if __name__ == '__main__':
+    main()
+

@@ -9,7 +9,8 @@ import os
 import requests
 from flask import Flask, send_file, request, Response
 # import ga4gh_tool_registry.validate as validate
-
+import urllib
+import createProcessedYAML
 from badge import passing_badge, failing_badge, warning_badge, error_badge
 from constants import SWAGGER, EXPECTED_PASSING_TESTS
 
@@ -88,5 +89,13 @@ def _filename_to_string(filename):
         return f.read()
 
 
+def _download_swagger_yaml():
+    file_directory = os.path.dirname(__file__)
+    swagger_file_path = os.path.join(file_directory, "ga4gh-tool-discovery.yaml")
+    urllib.urlretrieve("https://raw.githubusercontent.com/ga4gh/tool-registry-schemas/feature/trsv_changes/src/main/resources/swagger/ga4gh-tool-discovery.yaml", swagger_file_path)
+
+
 if __name__ == '__main__':
+    _download_swagger_yaml()
+    createProcessedYAML.main()
     app.run(debug=True, host='0.0.0.0')

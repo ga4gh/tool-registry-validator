@@ -6,20 +6,21 @@ RUN apt-get -qq update && apt-get install -y nodejs && apt-get install -y npm &&
 # install git
 RUN apt-get install git -y
 # install dredd 
-RUN npm install -g dredd
+RUN npm install -g dredd@4.7.0
 # test versions 
 RUN node -v && \
     npm -v && \
     dredd --version
 RUN apt-get install -y python-pip python-dev build-essential
+# This apparently forces --no-cache for this git cloning
 ADD https://api.github.com/repos/ga4gh/tool-registry-validator/compare/develop...HEAD /dev/null
 RUN git clone https://github.com/ga4gh/tool-registry-validator.git
+
 WORKDIR tool-registry-validator
 RUN git checkout feature/flask
 RUN python setup.py install
 RUN pip install -r validator/requirements.txt
 COPY ga4gh-tool-discovery.yaml validator
 RUN python validator/createProcessedYAML.py
-RUN python validator/createRelaxedYAML.py
 ENTRYPOINT ["python"]
 CMD ["validator/validator.py"]

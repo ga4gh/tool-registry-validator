@@ -14,7 +14,7 @@ NEW_TYPE = None
 NEW_RELATIVE_PATH = None
 NEW_VERSION_ID = None
 NEW_ID = None
-
+basePath = '/api/ga4gh/v1.1'
 
 @before_each
 def add_path_parameter_values(transaction):
@@ -36,6 +36,9 @@ def add_path_parameter_values(transaction):
         # Validator will notice this skipped test and output a warning badge instead.
         if '_placeholder' in transaction['fullPath']:
             print "Missing a valid tool id, version id, and/or descriptor type to test this endpoint"
+            print NEW_ID
+            print NEW_VERSION_ID
+            print NEW_TYPE
             transaction['skip'] = True
 
 
@@ -57,7 +60,7 @@ def relax_headers(transaction):
         return
 
 
-@before('GA4GH > /api/ga4gh/v1/tools/{id}/versions/{version_id}/descriptor/{relative_path} > Get additional tool '
+@before('GA4GH > ' + basePath + '/tools/{id}/versions/{version_id}/{type}/descriptor/{relative_path} > Get additional tool '
         'descriptor files (CWL/WDL) relative to the main file > 200 > application/json')
 def ignore_relative_path(transaction):
     """
@@ -67,7 +70,7 @@ def ignore_relative_path(transaction):
     transaction['skip'] = True
 
 
-@after('GA4GH > /api/ga4gh/v1/tools > List all tools > 200 > application/json')
+@after('GA4GH > ' + basePath + '/tools > List all tools > 200 > application/json')
 def add_value(transaction):
     """
     This determines what sample path parameters Dredd should test against for all other endpoints
@@ -120,4 +123,5 @@ def _check_version(versions, tool_id):
             NEW_TYPE = urllib.quote_plus(version['descriptor_type'][0])
             if _defined_parameters():
                 break
-
+    if not _defined_parameters():
+        print 'uhoh'

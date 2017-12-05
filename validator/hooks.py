@@ -36,9 +36,6 @@ def add_path_parameter_values(transaction):
         # Validator will notice this skipped test and output a warning badge instead.
         if '_placeholder' in transaction['fullPath']:
             print "Missing a valid tool id, version id, and/or descriptor type to test this endpoint"
-            print NEW_ID
-            print NEW_VERSION_ID
-            print NEW_TYPE
             transaction['skip'] = True
 
 
@@ -87,7 +84,7 @@ def add_value(transaction):
             tool_id = tool['id']
             if tool_id is not None:
                 _check_version(tool['versions'], tool_id)
-    except KeyError:
+    except (KeyError, TypeError) as e:
         return
 
 

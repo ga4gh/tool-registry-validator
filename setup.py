@@ -14,6 +14,6 @@ setup(name='ga4gh-tool-registry-validate',
       tests_require=[],
       zip_safe=True,
       entry_points={
-          'console_scripts': [ "ga4gh-tool-registry-validate=ga4gh_tool_registry.validate:main" ]
+          'console_scripts': ["ga4gh-tool-registry-validate=ga4gh_tool_registry.validate:main"]
       }
-)
+      )

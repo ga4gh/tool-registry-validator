@@ -7,4 +7,4 @@ install:
   - pip install pycodestyle
 
 # command to run tests
-script: pycodestyle .
+script: pycodestyle --max-line-length=100 .

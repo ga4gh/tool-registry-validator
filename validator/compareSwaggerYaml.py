@@ -21,9 +21,14 @@ def compare_definitions(yaml1, yaml2):
             print 'Comparing ' + definition
             definition1 = definitions1.get(definition)
             definition2 = definitions2.get(definition)
-            compare_definition(definition1, definition2, definition2, definition2)
+            compare_definition(
+                definition1,
+                definition2,
+                definition2,
+                definition2)
         else:
-            # Ignore missing Error definition because it definitely is not in proto
+            # Ignore missing Error definition because it definitely is not in
+            # proto
             if definition != 'Error':
                 print 'Missing definition: ' + definition
 
@@ -43,7 +48,11 @@ def rename_title_to_definition(definitions2):
                 rename_title_to_definition(definitions2.get(definition))
 
 
-def compare_definition(definition1, definition2, real_definition1, real_definition2):
+def compare_definition(
+        definition1,
+        definition2,
+        real_definition1,
+        real_definition2):
     """ Recursively compares the definitions between the two swagger yaml and all of its children
 
     :param definition1: The original swagger yaml's definition or a child of its definition
@@ -63,9 +72,12 @@ def compare_definition(definition1, definition2, real_definition1, real_definiti
                     enum_property = definition1.get('enum')
                     type_property = definition1.get('type')
                     ref_property = definition2.get('$ref')
-                    # Ignoring this case because conversion to proto messes up the enums
-                    if enum_property == ['CWL', 'WDL'] and type_property == 'string' and ref_property is not None:
-                        proto_definition = definition2.get('$ref').replace('#/definitions/', '')
+                    # Ignoring this case because conversion to proto messes up
+                    # the enums
+                    if enum_property == [
+                            'CWL', 'WDL'] and type_property == 'string' and ref_property is not None:
+                        proto_definition = definition2.get(
+                            '$ref').replace('#/definitions/', '')
                         if proto_definition is not None:
                             print 'Ignoring enum'
                         else:
@@ -79,7 +91,8 @@ def compare_definition(definition1, definition2, real_definition1, real_definiti
             new = modified.get(modified_property)[0]
             old = modified.get(modified_property)[1]
             if isinstance(new, dict) and isinstance(old, dict):
-                compare_definition(old, new, real_definition1, real_definition2)
+                compare_definition(
+                    old, new, real_definition1, real_definition2)
             else:
                 handle_error(modified_property, 'Modified')
 

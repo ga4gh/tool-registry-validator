@@ -27,7 +27,6 @@ def _compute_badge(url):
     # if err != 'API returned valid response\n':
     #     return failing_badge()
     # else:
-
     """
 
     :param url: The url the validator is testing
@@ -46,8 +45,10 @@ def _get_dredd_log(url):
     """
     file_url = re.sub(r'[^\w]', '', url.encode('utf8'))
     # if there is a log file and it was created in the last 5 mins (300 seconds)
-    # TODO: Explore the possibility of removing this.  Apparently GitHub caches it by default
-    if os.path.isfile(file_url) and time.time() - os.path.getmtime(file_url) < 300:
+    # TODO: Explore the possibility of removing this.  Apparently GitHub
+    # caches it by default
+    if os.path.isfile(file_url) and time.time() - \
+            os.path.getmtime(file_url) < 300:
         out2 = _filename_to_string(file_url)
     else:
         out2 = run_dredd(SWAGGER, url)
@@ -57,7 +58,6 @@ def _get_dredd_log(url):
 
 
 def _badge_from_output(output):
-
     """
     Determines which badge should be returned based on validation output
     :param output: Output from validation
@@ -105,7 +105,11 @@ def validate(url):
     """
     file_directory = os.path.dirname(__file__)
     swagger_file_path = os.path.join(file_directory, SWAGGER)
-    command_args = ['ga4gh-tool-registry-validate', swagger_file_path, 'annotations.yml', url + '/tools']
+    command_args = [
+        'ga4gh-tool-registry-validate',
+        swagger_file_path,
+        'annotations.yml',
+        url + '/tools']
     process = Popen(command_args, stdout=PIPE, stderr=PIPE)
     return process.communicate()
 
@@ -120,7 +124,18 @@ def run_dredd(swagger_filename, url):
     file_directory = os.path.dirname(__file__)
     swagger_file_path = os.path.join(file_directory, swagger_filename)
     hooks_file_path = os.path.join(file_directory, 'hooks.py')
-    command_args = ['dredd', swagger_file_path, url, '-l', 'fail', '-c', 'false', '-a', 'python', '-f', hooks_file_path]
+    command_args = [
+        'dredd',
+        swagger_file_path,
+        url,
+        '-l',
+        'fail',
+        '-c',
+        'false',
+        '-a',
+        'python',
+        '-f',
+        hooks_file_path]
     outfile = tempfile.NamedTemporaryFile('w')
     process = Popen(command_args, stdout=outfile, stderr=PIPE)
     process.wait()
@@ -150,8 +165,11 @@ def _download_swagger_yaml():
     TODO: Change the GitHub path once the TRSV changes are merged
     """
     file_directory = os.path.dirname(__file__)
-    swagger_file_path = os.path.join(file_directory, "ga4gh-tool-discovery.yaml")
-    urllib.urlretrieve("https://raw.githubusercontent.com/ga4gh/tool-registry-schemas/feature/trsv_changes/src/main/resources/swagger/ga4gh-tool-discovery.yaml", swagger_file_path)
+    swagger_file_path = os.path.join(
+        file_directory, "ga4gh-tool-discovery.yaml")
+    urllib.urlretrieve(
+        "https://raw.githubusercontent.com/ga4gh/tool-registry-schemas/feature/trsv_changes/src/main/resources/swagger/ga4gh-tool-discovery.yaml",
+        swagger_file_path)
 
 
 if __name__ == '__main__':

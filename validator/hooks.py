@@ -16,6 +16,7 @@ NEW_VERSION_ID = None
 NEW_ID = None
 basePath = '/api/ga4gh/v1.1'
 
+
 @before_each
 def add_path_parameter_values(transaction):
     """
@@ -27,13 +28,18 @@ def add_path_parameter_values(transaction):
     global NEW_TYPE
     global NEW_RELATIVE_PATH
     if _defined_parameters():
-        transaction['fullPath'] = transaction['fullPath'].replace(DEFAULT_VERSION_ID, NEW_VERSION_ID)
-        transaction['fullPath'] = transaction['fullPath'].replace(DEFAULT_TYPE, NEW_TYPE)
-        transaction['fullPath'] = transaction['fullPath'].replace(DEFAULT_RELATIVE_PATH, '%2Fsequenza.cwl')
-        transaction['fullPath'] = transaction['fullPath'].replace(DEFAULT_ID, NEW_ID)
+        transaction['fullPath'] = transaction['fullPath'].replace(
+            DEFAULT_VERSION_ID, NEW_VERSION_ID)
+        transaction['fullPath'] = transaction['fullPath'].replace(
+            DEFAULT_TYPE, NEW_TYPE)
+        transaction['fullPath'] = transaction['fullPath'].replace(
+            DEFAULT_RELATIVE_PATH, '%2Fsequenza.cwl')
+        transaction['fullPath'] = transaction['fullPath'].replace(
+            DEFAULT_ID, NEW_ID)
     else:
         # If there are no defined parameters but there's a path parameter, skip test.
-        # Validator will notice this skipped test and output a warning badge instead.
+        # Validator will notice this skipped test and output a warning badge
+        # instead.
         if '_placeholder' in transaction['fullPath']:
             print "Missing a valid tool id, version id, and/or descriptor type to test this endpoint"
             transaction['skip'] = True
@@ -57,8 +63,11 @@ def relax_headers(transaction):
         return
 
 
-@before('GA4GH > ' + basePath + '/tools/{id}/versions/{version_id}/{type}/descriptor/{relative_path} > Get additional tool '
-        'descriptor files (CWL/WDL) relative to the main file > 200 > application/json')
+@before(
+    'GA4GH > ' +
+    basePath +
+    '/tools/{id}/versions/{version_id}/{type}/descriptor/{relative_path} > Get additional tool '
+    'descriptor files (CWL/WDL) relative to the main file > 200 > application/json')
 def ignore_relative_path(transaction):
     """
     Skipping this endpoint because it's really difficult to get an example relative_path to test against

@@ -49,7 +49,8 @@ def append_x_example(paths):
         if parameters is not None:
             for parameter in parameters:
                 if parameter.get('in') == 'path':
-                    parameter['x-example'] = parameter.get('name') + '_placeholder'
+                    parameter['x-example'] = parameter.get(
+                        'name') + '_placeholder'
 
 
 def main():
@@ -66,4 +67,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

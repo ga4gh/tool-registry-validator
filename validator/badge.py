@@ -27,7 +27,7 @@ def passing_badge():
 def warning_badge():
     """
 
-    :return: A badge denoting that the validation does not contain any errors or failures, but some endpoints are skipped
+    :return: A badge denoting that the validation does not contain any errors or failures, but some skipped endpoints
     """
     status_text = 'warning'
     status_color = 'orange'

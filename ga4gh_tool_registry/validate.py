@@ -21,9 +21,11 @@ from cwltool.load_tool import validate_document
 from rdflib import Graph, URIRef, Literal, Namespace
 from rdflib.namespace import Namespace
 
+
 def expand_cwl(cwl, uri, g):
     try:
-        document_loader = Loader({"cwl": "https://w3id.org/cwl/cwl#", "id": "@id"})
+        document_loader = Loader(
+            {"cwl": "https://w3id.org/cwl/cwl#", "id": "@id"})
         cwl = yaml.load(cwl)
         document_loader, avsc_names, processobj, metadata, uri = validate_document(
             document_loader, cwl, uri, strict=False)
@@ -49,7 +51,6 @@ def main():
 
 def validate(swagger, annotations, url, print_rdf, serve, fuseki_path):
     warnings.simplefilter('ignore', yaml.error.UnsafeLoaderWarning)
-
     with open(annotations) as f2:
         annotations = yaml.load(f2)
 
@@ -59,9 +60,14 @@ def validate(swagger, annotations, url, print_rdf, serve, fuseki_path):
     sld["$base"] = "http://ga4gh.org/schemas/tool-registry-schemas"
     sld["name"] = "file://" + os.path.realpath(swagger)
 
-    document_loader, avsc_names, schema_metadata, metaschema_loader = load_schema(cmap(sld))
-
-    txt = document_loader.fetch_text(urlparse.urljoin("file://" + os.getcwd() + "/", url))
+    document_loader, avsc_names, schema_metadata, metaschema_loader = load_schema(
+        cmap(sld))
+    txt = document_loader.fetch_text(
+        urlparse.urljoin(
+            "file://" +
+            os.getcwd() +
+            "/",
+            url))
     r = yaml.load(txt)
 
     validate_doc(avsc_names, r, document_loader, True)
@@ -69,7 +75,8 @@ def validate(swagger, annotations, url, print_rdf, serve, fuseki_path):
     sys.stderr.write("API returned valid response\n")
 
     toolreg = Namespace("http://ga4gh.org/schemas/tool-registry-schemas#")
-    td = Namespace("http://ga4gh.org/schemas/tool-registry-schemas#ToolDescriptor/")
+    td = Namespace(
+        "http://ga4gh.org/schemas/tool-registry-schemas#ToolDescriptor/")
 
     if print_rdf or serve:
         g = jsonld_context.makerdf(url, r, document_loader.ctx)
@@ -84,4 +91,5 @@ def validate(swagger, annotations, url, print_rdf, serve, fuseki_path):
         t = tempfile.NamedTemporaryFile(suffix=".ttl")
         g.serialize(t, format="turtle")
         t.flush()
-        subprocess.check_call(["./fuseki-server", "--file=" + t.name, "/tools"], cwd=fuseki_path)
+        subprocess.check_call(
+            ["./fuseki-server", "--file=" + t.name, "/tools"], cwd=fuseki_path)

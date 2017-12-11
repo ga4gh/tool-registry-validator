@@ -12,7 +12,7 @@ from flask import Flask, send_file, request, Response
 import urllib
 import createProcessedYAML
 from badge import passing_badge, failing_badge, warning_badge, error_badge
-from constants import SWAGGER, EXPECTED_PASSING_TESTS
+from constants import SWAGGER, EXPECTED_PASSING_TESTS, GITHUB_BASEURL, GITHUB_BRANCH, GITHUB_FILE_PATH
 
 app = Flask(__name__)
 
@@ -168,7 +168,7 @@ def _download_swagger_yaml():
     swagger_file_path = os.path.join(
         file_directory, "ga4gh-tool-discovery.yaml")
     urllib.urlretrieve(
-        "https://raw.githubusercontent.com/ga4gh/tool-registry-schemas/feature/trsv_changes/src/main/resources/swagger/ga4gh-tool-discovery.yaml",
+        GITHUB_BASEURL + "/" + GITHUB_BRANCH + "/" + GITHUB_FILE_PATH,
         swagger_file_path)
 
 

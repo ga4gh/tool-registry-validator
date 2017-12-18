@@ -46,17 +46,11 @@ def _get_dredd_log(url):
     :return: The Dredd validation output
     """
     file_url = re.sub(r'[^\w]', '', url.encode('utf8'))
-    # if there is a log file and it was created in the last 5 mins (300 seconds)
-    # TODO: Explore the possibility of removing this.  Apparently GitHub
-    # caches it by default
-    if os.path.isfile(file_url) and time.time() - \
-            os.path.getmtime(file_url) < 300:
-        out2 = _filename_to_string(file_url)
-    else:
-        out2 = run_dredd(SWAGGER, url)
-        with open(file_url, 'w+') as warning_yaml_file:
-            warning_yaml_file.write(out2)
-    return out2
+    log = cache.get(file_url)
+    if log is None:
+        log = run_dredd(SWAGGER, url)
+        cache.set(file_url, log, timeout=5 * 60)
+    return log
 
 
 def _badge_from_output(output):

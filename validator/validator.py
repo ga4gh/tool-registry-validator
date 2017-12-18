@@ -4,7 +4,6 @@ import tempfile
 
 import re
 from healthcheck import HealthCheck, EnvironmentDump
-import time
 import os
 import requests
 from flask import Flask, send_file, request, Response
@@ -20,6 +19,9 @@ app = Flask(__name__)
 health = HealthCheck(app, "/health_check")
 envdump = EnvironmentDump(app, "/environment")
 cache = SimpleCache()
+
+BADGE_CACHE_TIMEOUT = 24*60*60
+LOG_CACHE_TIMEOUT = 5*60
 
 
 def _compute_badge(url):
@@ -49,7 +51,7 @@ def _get_dredd_log(url):
     log = cache.get(file_url)
     if log is None:
         log = run_dredd(SWAGGER, url)
-        cache.set(file_url, log, timeout=5 * 60)
+        cache.set(file_url, log, timeout=LOG_CACHE_TIMEOUT)
     return log
 
 
@@ -63,25 +65,29 @@ def _badge_from_output(output):
         badge = cache.get('error')
         if badge is None:
             badge = requests.get(error_badge())
-            cache.set('error', badge, timeout=5*60)
+            if badge.status_code == 200:
+                cache.set('error', badge, timeout=BADGE_CACHE_TIMEOUT)
         return badge
     if ' 0 failing' not in output:
         badge = cache.get('failing')
         if badge is None:
             badge = requests.get(failing_badge())
-            cache.set('failing', badge, timeout=5 * 60)
+            if badge.status_code == 200:
+                cache.set('failing', badge, timeout=BADGE_CACHE_TIMEOUT)
         return badge
     if str(EXPECTED_PASSING_TESTS) + ' passing' not in output:
         badge = cache.get('warning')
         if badge is None:
             badge = requests.get(warning_badge())
-            cache.set('warning', badge, timeout=5 * 60)
+            if badge.status_code == 200:
+                cache.set('warning', badge, timeout=BADGE_CACHE_TIMEOUT)
         return badge
     if ' 0 failing, 0 errors' in output:
         badge = cache.get('passing')
         if badge is None:
             badge = requests.get(passing_badge())
-            cache.set('passing', badge, timeout=5 * 60)
+            if badge.status_code == 200:
+                cache.set('passing', badge, timeout=BADGE_CACHE_TIMEOUT)
         return badge
 
 

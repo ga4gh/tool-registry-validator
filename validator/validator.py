@@ -8,6 +8,7 @@ import time
 import os
 import requests
 from flask import Flask, send_file, request, Response
+from werkzeug.contrib.cache import SimpleCache
 # import ga4gh_tool_registry.validate as validate
 import urllib
 import createProcessedYAML
@@ -18,6 +19,7 @@ app = Flask(__name__)
 
 health = HealthCheck(app, "/health_check")
 envdump = EnvironmentDump(app, "/environment")
+cache = SimpleCache()
 
 
 def _compute_badge(url):
@@ -64,13 +66,29 @@ def _badge_from_output(output):
     :return: Badge based on validation output
     """
     if ' 0 errors' not in output:
-        return error_badge()
+        badge = cache.get('error')
+        if badge is None:
+            badge = requests.get(error_badge())
+            cache.set('error', badge, timeout=5*60)
+        return badge
     if ' 0 failing' not in output:
-        return failing_badge()
+        badge = cache.get('failing')
+        if badge is None:
+            badge = requests.get(failing_badge())
+            cache.set('failing', badge, timeout=5 * 60)
+        return badge
     if str(EXPECTED_PASSING_TESTS) + ' passing' not in output:
-        return warning_badge()
+        badge = cache.get('warning')
+        if badge is None:
+            badge = requests.get(warning_badge())
+            cache.set('warning', badge, timeout=5 * 60)
+        return badge
     if ' 0 failing, 0 errors' in output:
-        return passing_badge()
+        badge = cache.get('passing')
+        if badge is None:
+            badge = requests.get(passing_badge())
+            cache.set('passing', badge, timeout=5 * 60)
+        return badge
 
 
 @app.route('/trs/validator', methods=['GET'])
@@ -80,8 +98,8 @@ def status_badge():
     :return: Status badge
     """
     url = request.args.get('url', '')
-    r = requests.get(_compute_badge(url))
-    return send_file(BytesIO(r.content), mimetype=r.headers['Content-Type'])
+    badge_response = _compute_badge(url)
+    return send_file(BytesIO(badge_response.content), mimetype=badge_response.headers['Content-Type'])
 
 
 @app.route('/trs/validator/debug', methods=['GET'])

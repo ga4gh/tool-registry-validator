@@ -175,4 +175,4 @@ def _download_swagger_yaml():
 if __name__ == '__main__':
     _download_swagger_yaml()
     createProcessedYAML.main()
-    app.run(debug=True, host='0.0.0.0')
+    app.run(host='0.0.0.0', port=8080)

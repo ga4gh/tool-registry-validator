@@ -13,7 +13,7 @@ import urllib
 import createProcessedYAML
 from badge import passing_badge, failing_badge, warning_badge, error_badge
 from constants import SWAGGER, EXPECTED_PASSING_TESTS, GITHUB_BASEURL, GITHUB_BRANCH, GITHUB_FILE_PATH
-
+import uwsgi
 app = Flask(__name__)
 
 health = HealthCheck(app, "/health_check")
@@ -50,7 +50,9 @@ def _get_dredd_log(url):
     file_url = re.sub(r'[^\w]', '', url.encode('utf8'))
     log = cache.get(file_url)
     if log is None:
+        uwsgi.lock()
         log = run_dredd(SWAGGER, url)
+        uwsgi.unlock()
         cache.set(file_url, log, timeout=LOG_CACHE_TIMEOUT)
     return log
 
@@ -190,7 +192,7 @@ def _download_swagger_yaml():
         swagger_file_path)
 
 
+_download_swagger_yaml()
+createProcessedYAML.main()
 if __name__ == '__main__':
-    _download_swagger_yaml()
-    createProcessedYAML.main()
     app.run(host='0.0.0.0', port=8080)

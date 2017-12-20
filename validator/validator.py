@@ -157,7 +157,7 @@ def run_dredd(swagger_filename, url):
         '-f',
         hooks_file_path]
     outfile = tempfile.NamedTemporaryFile('w')
-    process = Popen(command_args, stdout=outfile, stderr=PIPE)
+    process = Popen(command_args, stdout=outfile, stderr=outfile)
     process.wait()
     return _filename_to_string(outfile.name)
 

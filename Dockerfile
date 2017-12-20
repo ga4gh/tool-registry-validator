@@ -2,7 +2,7 @@ FROM ubuntu:latest
 MAINTAINER Gary Luu "gary.luu@oicr.on.ca"
 RUN apt-get update -y
 # install node.js and npm
-RUN apt-get -qq update && apt-get install -y nodejs && apt-get install -y npm && apt-get install -y wget && ln -s /usr/bin/nodejs /usr/bin/node
+RUN apt-get -qq update && apt-get install -y nodejs && apt-get install -y npm && ln -s /usr/bin/nodejs /usr/bin/node
 # install git
 RUN apt-get install git -y
 # install dredd 
@@ -21,9 +21,6 @@ WORKDIR tool-registry-validator
 RUN git checkout feature/flask
 RUN python setup.py install
 RUN pip install -r validator/requirements.txt
-RUN wget https://bootstrap.pypa.io/get-pip.py
-RUN python2.7 get-pip.py
-RUN pip2.7 install uwsgi -I --no-cache-dir
-RUN pip2.7 list
+RUN pip install uwsgi -I --no-cache-dir
 WORKDIR validator
-ENTRYPOINT ["uwsgi", "--http-socket", ":8080", "--wsgi-file", "validator.py", "--callable", "app", "--enable-threads", "--thunder-lock", "-p", "50"]
+ENTRYPOINT ["uwsgi", "--http-socket", ":8080", "--wsgi-file", "validator.py", "--callable", "app", "--enable-threads", "--thunder-lock", "-p", "8"]

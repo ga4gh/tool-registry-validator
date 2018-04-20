@@ -125,7 +125,7 @@ if __name__ == "__main__":
                 except Exception as e:
                     sys.stderr.write("\nError reading %s: %s\n" % (path, e))
                 except KeyboardInterrupt:
-                    sys.stderr.write("\Interrupted reading %s\n" % (path))
+                    sys.stderr.write("\nInterrupted reading %s\n" % (path))
                     raise
                 else:
                     sys.stderr.write("\nReading %s ok\n" % (path,))

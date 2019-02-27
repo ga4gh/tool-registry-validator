@@ -10,7 +10,7 @@ RUN apt-get install -y nodejs
 # install git
 RUN apt-get install git -y
 # install dredd 
-RUN npm install -g dredd@8.0.3 --unsafe-perm
+RUN npm install -g dredd@5.1.11 --unsafe-perm
 # test versions 
 RUN node -v && \
     npm -v && \

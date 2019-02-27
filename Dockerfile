@@ -1,17 +1,20 @@
 FROM ubuntu:latest
 MAINTAINER Gary Luu "gary.luu@oicr.on.ca"
-RUN apt-get update -y
+RUN apt-get update -yq
+RUN  apt-get update -yq \
+    && apt-get install curl gnupg -yq \
+    && curl -sL https://deb.nodesource.com/setup_8.x | bash \
+    && apt-get install nodejs -yq
 # install node.js and npm
-RUN apt-get -qq update && apt-get install -y nodejs && apt-get install -y npm && ln -s /usr/bin/nodejs /usr/bin/node
 # install git
-RUN apt-get install git -y
+RUN apt-get install git -yq
 # install dredd 
 RUN npm install -g dredd@4.7.0
 # test versions 
 RUN node -v && \
     npm -v && \
     dredd --version
-RUN apt-get install -y python-pip python-dev build-essential
+RUN apt-get install -yq python-pip python-dev build-essential
 # This apparently forces --no-cache for git cloning and sadly everything after it
 # TODO: Change all feature/flask in this file to the correct branch 
 ADD https://api.github.com/repos/ga4gh/tool-registry-validator/compare/feature/validatorUpdate...HEAD /dev/null

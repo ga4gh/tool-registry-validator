@@ -1,0 +1,10 @@
+language: python
+python:
+  - "2.7"
+
+# command to install dependencies
+install:
+  - pip install pycodestyle
+
+# command to run tests
+script: pycodestyle --max-line-length=120 .

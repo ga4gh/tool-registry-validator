@@ -27,4 +27,4 @@ RUN python setup.py install
 RUN pip install -r validator/requirements.txt
 RUN pip install uwsgi -I --no-cache-dir
 WORKDIR validator
-ENTRYPOINT ["uwsgi", "--http-socket", ":8080", "--wsgi-file", "validator.py", "--callable", "app", "--enable-threads", "--thunder-lock", "-p", "8"]
+ENTRYPOINT ["uwsgi", "--http-socket", ":8080", "--wsgi-file", "validator.py", "--callable", "app", "--enable-threads", "--thunder-lock", "-p", "1"]

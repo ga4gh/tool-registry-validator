@@ -7,7 +7,7 @@ from healthcheck import HealthCheck, EnvironmentDump
 import os
 import requests
 from flask import Flask, send_file, request, Response
-from werkzeug.contrib.cache import SimpleCache
+from flask_caching import Cache
 # import ga4gh_tool_registry.validate as validate
 import urllib
 import createProcessedYAML
@@ -18,7 +18,7 @@ app = Flask(__name__)
 
 health = HealthCheck(app, "/health_check")
 envdump = EnvironmentDump(app, "/environment")
-cache = SimpleCache()
+cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 BADGE_CACHE_TIMEOUT = 24*60*60
 LOG_CACHE_TIMEOUT = 24*60*60

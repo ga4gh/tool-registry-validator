@@ -18,11 +18,11 @@ RUN node -v && \
 RUN apt-get install -y python-pip python-dev build-essential
 # This apparently forces --no-cache for git cloning and sadly everything after it
 # TODO: Change all feature/flask in this file to the correct branch
-ADD https://api.github.com/repos/ga4gh/tool-registry-validator/compare/feature/validatorUpdate...HEAD /dev/null
+ADD https://api.github.com/repos/ga4gh/tool-registry-validator/compare/develop...HEAD /dev/null
 RUN git clone https://github.com/ga4gh/tool-registry-validator.git
 
 WORKDIR tool-registry-validator
-RUN git checkout feature/validatorUpdate
+RUN git checkout develop
 RUN python setup.py install
 RUN pip install -r validator/requirements.txt
 RUN pip install uwsgi -I --no-cache-dir

@@ -9,11 +9,11 @@ RUN npm install -g dredd@8.0.3 --unsafe-perm --allow-root
 RUN apt-get install python-pip -yq
 # This apparently forces --no-cache for git cloning and sadly everything after it
 # TODO: Change all feature/flask in this file to the correct branch
-ADD https://api.github.com/repos/ga4gh/tool-registry-validator/compare/feature/README...HEAD /dev/null
+ADD https://api.github.com/repos/ga4gh/tool-registry-validator/compare/develop...HEAD /dev/null
 RUN git clone https://github.com/ga4gh/tool-registry-validator.git
 
 WORKDIR tool-registry-validator
-RUN git checkout feature/README
+RUN git checkout develop
 RUN pip install -r validator/requirements.txt
 RUN pip install uwsgi -I --no-cache-dir
 WORKDIR validator

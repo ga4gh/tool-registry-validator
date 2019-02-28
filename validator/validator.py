@@ -57,12 +57,10 @@ def _get_dredd_log(url):
     :return: The Dredd validation output
     """
     file_url = re.sub(r'[^\w]', '', url.encode('utf8'))
-    log = cache.get(file_url)
-    if log is None:
-        uwsgi.lock()
-        log = run_dredd(SWAGGER, url)
-        uwsgi.unlock()
-        cache.set(file_url, log, timeout=LOG_CACHE_TIMEOUT)
+    uwsgi.lock()
+    log = run_dredd(SWAGGER, url)
+    uwsgi.unlock()
+    cache.set(file_url, log, timeout=LOG_CACHE_TIMEOUT)
     return log
 
 

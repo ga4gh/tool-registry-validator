@@ -6,7 +6,7 @@ RUN apt-get install git -yq
 # install dredd
 RUN npm install -g dredd@8.0.3 --unsafe-perm --allow-root
 # install python
-RUN apt-get install python-pip python-dev build-essential -yq
+RUN apt-get install python-pip -yq
 # This apparently forces --no-cache for git cloning and sadly everything after it
 # TODO: Change all feature/flask in this file to the correct branch
 ADD https://api.github.com/repos/ga4gh/tool-registry-validator/compare/feature/README...HEAD /dev/null

@@ -14,6 +14,7 @@ def create_processed_yaml(yaml_file):
     """
     yaml_file.pop('externalDocs', None)
     paths = yaml_file.get('paths')
+    replace_tool_limit(yaml_file.get('parameters'))
     fix_example(paths)
     fix_example(yaml_file.get('definitions'))
     remove_headers(paths)
@@ -22,6 +23,15 @@ def create_processed_yaml(yaml_file):
     relaxed_swagger = os.path.join(file_directory, constants.SWAGGER)
     with open(relaxed_swagger, 'w') as warning_yaml_file:
         yaml.dump(yaml_file, warning_yaml_file, allow_unicode=True)
+
+
+def replace_tool_limit(a_dict):
+    for k, v in a_dict.items():
+        if not isinstance(v, dict):
+            if v and 1000 == v:
+                a_dict[k] = 30
+        else:
+            replace_tool_limit(v)
 
 
 def remove_headers(properties):

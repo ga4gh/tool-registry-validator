@@ -7,21 +7,21 @@ from healthcheck import HealthCheck, EnvironmentDump
 import os
 import requests
 from flask import Flask, send_file, request, Response
-from werkzeug.contrib.cache import SimpleCache
+from flask_caching import Cache
 # import ga4gh_tool_registry.validate as validate
 import urllib
 import createProcessedYAML
-from badge import passing_badge, failing_badge, warning_badge, error_badge
+from badge import passing_badge, failing_badge, warning_badge, error_badge, unknown_badge
 from constants import SWAGGER, EXPECTED_PASSING_TESTS, GITHUB_BASEURL, GITHUB_BRANCH, GITHUB_FILE_PATH
 import uwsgi
 app = Flask(__name__)
 
 health = HealthCheck(app, "/health_check")
 envdump = EnvironmentDump(app, "/environment")
-cache = SimpleCache()
+cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 BADGE_CACHE_TIMEOUT = 24*60*60
-LOG_CACHE_TIMEOUT = 5*60
+LOG_CACHE_TIMEOUT = 24*60*60
 
 
 def _compute_badge(url):
@@ -36,8 +36,17 @@ def _compute_badge(url):
     :param url: The url the validator is testing
     :return: A badge determined by the test status
     """
-    out2 = _get_dredd_log(url)
-    return _badge_from_output(out2)
+    file_url = re.sub(r'[^\w]', '', url.encode('utf8'))
+    log = cache.get(file_url)
+    if log is None:
+        badge = cache.get('unknown')
+        if badge is None:
+            badge = requests.get(unknown_badge())
+            if badge.status_code == 200:
+                cache.set('unknown', badge, timeout=BADGE_CACHE_TIMEOUT)
+        return badge
+    else:
+        return _badge_from_output(log)
 
 
 def _get_dredd_log(url):
@@ -48,12 +57,10 @@ def _get_dredd_log(url):
     :return: The Dredd validation output
     """
     file_url = re.sub(r'[^\w]', '', url.encode('utf8'))
-    log = cache.get(file_url)
-    if log is None:
-        uwsgi.lock()
-        log = run_dredd(SWAGGER, url)
-        uwsgi.unlock()
-        cache.set(file_url, log, timeout=LOG_CACHE_TIMEOUT)
+    uwsgi.lock()
+    log = run_dredd(SWAGGER, url)
+    uwsgi.unlock()
+    cache.set(file_url, log, timeout=LOG_CACHE_TIMEOUT)
     return log
 
 
@@ -149,9 +156,8 @@ def run_dredd(swagger_filename, url):
         swagger_file_path,
         url,
         '-l',
-        'fail',
-        '-c',
-        'false',
+        'error',
+        '--no-color',
         '-a',
         'python',
         '-f',

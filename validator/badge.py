@@ -61,3 +61,16 @@ def error_badge():
         _badge_escape(BADGE_NAME),
         _badge_escape(status_text),
         status_color)
+
+
+def unknown_badge():
+    """
+
+    :return: A badge denoting that the validation has not been performed in a while
+    """
+    status_text = 'unknown'
+    status_color = 'grey'
+    return BADGE_URL.format(
+        _badge_escape(BADGE_NAME),
+        _badge_escape(status_text),
+        status_color)

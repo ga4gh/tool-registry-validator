@@ -11,7 +11,7 @@ DEFAULT_VERSION_ID = 'version_id_placeholder'
 DEFAULT_ID = 'id_placeholder'
 
 NEW_TYPE = None
-NEW_RELATIVE_PATH = None
+NEW_RELATIVE_PATH = 'Dockerfile'
 NEW_VERSION_ID = None
 NEW_ID = None
 basePath = '/api/ga4gh/v2'
@@ -33,7 +33,7 @@ def add_path_parameter_values(transaction):
         transaction['fullPath'] = transaction['fullPath'].replace(
             DEFAULT_TYPE, NEW_TYPE)
         transaction['fullPath'] = transaction['fullPath'].replace(
-            DEFAULT_RELATIVE_PATH, '%2Fsequenza.cwl')
+            DEFAULT_RELATIVE_PATH, NEW_RELATIVE_PATH)
         transaction['fullPath'] = transaction['fullPath'].replace(
             DEFAULT_ID, NEW_ID)
     else:

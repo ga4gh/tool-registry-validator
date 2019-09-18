@@ -1,19 +1,20 @@
-FROM node:10.15.2-slim
+FROM node:12.10-slim
 MAINTAINER Gary Luu "gary.luu@oicr.on.ca"
-RUN apt-get update -yq
+RUN apt update -yq
 # install git
-RUN apt-get install git -yq
+RUN apt install git -yq
 # install dredd
-RUN npm install -g dredd@8.0.3 --unsafe-perm --allow-root
+RUN npm install -g dredd@12.0.7 --unsafe-perm --allow-root
 # install python
-RUN apt-get install python-pip -yq
+RUN apt install python-pip -yq
+# set branch
+ARG BRANCH=develop
 # This apparently forces --no-cache for git cloning and sadly everything after it
-# TODO: Change all feature/flask in this file to the correct branch
-ADD https://api.github.com/repos/ga4gh/tool-registry-validator/compare/develop...HEAD /dev/null
+ADD https://api.github.com/repos/ga4gh/tool-registry-validator/compare/${BRANCH}...HEAD /dev/null
 RUN git clone https://github.com/ga4gh/tool-registry-validator.git
 
 WORKDIR tool-registry-validator
-RUN git checkout develop
+RUN git checkout ${BRANCH}
 RUN pip install -r validator/requirements.txt
 RUN pip install uwsgi -I --no-cache-dir
 WORKDIR validator

@@ -1,4 +1,4 @@
-from dredd_hooks import before_each, before_each_validation, after, before
+from dredd_hooks import before_each, before_each_validation, after, before, before_all
 from flask import json
 import ast
 import urllib
@@ -11,10 +11,23 @@ DEFAULT_VERSION_ID = 'version_id_placeholder'
 DEFAULT_ID = 'id_placeholder'
 
 NEW_TYPE = None
-NEW_RELATIVE_PATH = 'Dockerfile'
+NEW_RELATIVE_PATH = None
 NEW_VERSION_ID = None
 NEW_ID = None
 basePath = '/api/ga4gh/v2'
+
+
+@before_all
+def early_files_transaction(transactions):
+    """
+    Originally the transactions are /descriptors, /descriptors/{relative_path}, /files.
+    This swaps the transactions so that /files is first in order to determine the relative_path parameter
+    :param transactions:
+    :return:
+    """
+    transactions[10], transactions[11], transactions[12], transactions[13], transactions[14], transactions[15] = \
+        transactions[14], transactions[15], transactions[10], transactions[11], transactions[12], transactions[13]
+    return
 
 
 @before_each
@@ -32,8 +45,6 @@ def add_path_parameter_values(transaction):
             DEFAULT_VERSION_ID, NEW_VERSION_ID)
         transaction['fullPath'] = transaction['fullPath'].replace(
             DEFAULT_TYPE, NEW_TYPE)
-        transaction['fullPath'] = transaction['fullPath'].replace(
-            DEFAULT_RELATIVE_PATH, NEW_RELATIVE_PATH)
         transaction['fullPath'] = transaction['fullPath'].replace(
             DEFAULT_ID, NEW_ID)
     else:
@@ -65,15 +76,20 @@ def relax_headers(transaction):
 
 @before(
     'GA4GH > ' +
-    basePath +
-    '/tools/{id}/versions/{version_id}/{type}/descriptor/{relative_path} > Get additional tool '
-    'descriptor files (CWL/WDL) relative to the main file > 200 > application/json')
+    basePath + '/tools/{id}/versions/{version_id}/{type}/descriptor/{relative_path} > '
+               'Get additional tool descriptor files relative to the main file > '
+               '200 > '
+               'application/json')
 def ignore_relative_path(transaction):
     """
     Skipping this endpoint because it's really difficult to get an example relative_path to test against
     :param transaction: Dredd transaction object
     """
-    transaction['skip'] = True
+    if NEW_RELATIVE_PATH is not None:
+        transaction['fullPath'] = transaction['fullPath'].replace(
+            DEFAULT_RELATIVE_PATH, NEW_RELATIVE_PATH)
+    else:
+        transaction['skip'] = True
 
 
 @after('GA4GH > ' + basePath + '/tools > List all tools > 200 > application/json')
@@ -95,6 +111,23 @@ def add_value(transaction):
                 _check_version(tool['versions'], tool_id)
     except (KeyError, TypeError) as e:
         return
+
+
+@after('GA4GH > ' + basePath + '/tools/{id}/versions/{version_id}/{type}/files > '
+                               'Get a list of objects that contain the relative path and file type > '
+                               '200 > '
+                               'application/json')
+def add_relative_path_parameter(transaction):
+    """
+    Use the /files endpoint to get the relative_path parameter for the /relative_path endpoint
+    :param transaction:
+    :return:
+    """
+    global NEW_RELATIVE_PATH
+    string = (json.dumps(transaction['real']['body']))
+    d = ast.literal_eval(string)
+    jdata = json.loads(d)
+    NEW_RELATIVE_PATH = urllib.quote_plus(jdata[0]['path'])
 
 
 def _defined_parameters():
@@ -122,7 +155,6 @@ def _check_version(versions, tool_id):
             global NEW_ID
             global NEW_VERSION_ID
             global NEW_TYPE
-            global NEW_RELATIVE_PATH
             print tool_id
             NEW_ID = urllib.quote_plus(tool_id)
             NEW_VERSION_ID = urllib.quote_plus(version['name'])

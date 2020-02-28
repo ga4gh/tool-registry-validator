@@ -1,10 +1,10 @@
-FROM node:12.10-slim
+FROM node:lts-slim
 MAINTAINER Gary Luu "gary.luu@oicr.on.ca"
 RUN apt update -yq
 # install git
 RUN apt install git -yq
 # install dredd
-RUN npm install -g dredd@12.0.7 --unsafe-perm --allow-root
+RUN npm install -g dredd@13.0.0
 # install python
 RUN apt install python-pip -yq
 # set branch

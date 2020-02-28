@@ -119,7 +119,7 @@ def debug():
     """
     url = request.args.get('url', '')
     r = _get_dredd_log(url)
-    response = Response(r, mimetype="text/plain")
+    response = Response(r, mimetype="text/html")
     return response
 
 
@@ -151,19 +151,22 @@ def run_dredd(swagger_filename, url):
     file_directory = os.path.dirname(__file__)
     swagger_file_path = os.path.join(file_directory, swagger_filename)
     hooks_file_path = os.path.join(file_directory, 'hooks.py')
+    outfile = tempfile.NamedTemporaryFile('w')
     command_args = [
         'dredd',
         swagger_file_path,
         url,
         '-l',
         'error',
-        '--no-color',
         '-a',
         'python',
+        '-r',
+        'html',
+        '-o',
+        outfile.name,
         '-f',
         hooks_file_path]
-    outfile = tempfile.NamedTemporaryFile('w')
-    process = Popen(command_args, stdout=outfile, stderr=outfile)
+    process = Popen(command_args)
     process.wait()
     return _filename_to_string(outfile.name)
 

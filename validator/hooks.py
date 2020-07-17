@@ -14,7 +14,7 @@ NEW_TYPE = None
 NEW_RELATIVE_PATH = None
 NEW_VERSION_ID = None
 NEW_ID = None
-basePath = '/api/ga4gh/v2'
+basePath = '/ga4gh/trs/v2'
 
 
 @before_all

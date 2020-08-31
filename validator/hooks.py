@@ -26,8 +26,21 @@ def early_files_transaction(transactions):
     :return:
     """
     length = len(transactions)
-    transactions[length-6], transactions[length-5], transactions[length-4], transactions[length-3], transactions[length-2], transactions[length-1] = \
-        transactions[length-4], transactions[length-3], transactions[length-2], transactions[length-1], transactions[length-6], transactions[length-5]
+    (
+        transactions[length - 6],
+        transactions[length - 5],
+        transactions[length - 4],
+        transactions[length - 3],
+        transactions[length - 2],
+        transactions[length - 1],
+        ) = (
+        transactions[length - 4],
+        transactions[length - 3],
+        transactions[length - 2],
+        transactions[length - 1],
+        transactions[length - 6],
+        transactions[length - 5],
+        )
     return
 
 

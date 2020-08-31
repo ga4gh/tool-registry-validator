@@ -14,7 +14,7 @@ NEW_TYPE = None
 NEW_RELATIVE_PATH = None
 NEW_VERSION_ID = None
 NEW_ID = None
-basePath = '/api/ga4gh/v2'
+basePath = '/ga4gh/trs/v2'
 
 
 @before_all
@@ -25,8 +25,22 @@ def early_files_transaction(transactions):
     :param transactions:
     :return:
     """
-    transactions[10], transactions[11], transactions[12], transactions[13], transactions[14], transactions[15] = \
-        transactions[14], transactions[15], transactions[10], transactions[11], transactions[12], transactions[13]
+    length = len(transactions)
+    (
+        transactions[length - 6],
+        transactions[length - 5],
+        transactions[length - 4],
+        transactions[length - 3],
+        transactions[length - 2],
+        transactions[length - 1],
+        ) = (
+        transactions[length - 4],
+        transactions[length - 3],
+        transactions[length - 2],
+        transactions[length - 1],
+        transactions[length - 6],
+        transactions[length - 5],
+        )
     return
 
 

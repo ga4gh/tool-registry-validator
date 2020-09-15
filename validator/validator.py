@@ -70,14 +70,14 @@ def _badge_from_output(output):
     :param output: Output from validation
     :return: Badge based on validation output
     """
-    if ' 0 errors' not in output:
+    if '0 errors' not in output:
         badge = cache.get('error')
         if badge is None:
             badge = requests.get(error_badge())
             if badge.status_code == 200:
                 cache.set('error', badge, timeout=BADGE_CACHE_TIMEOUT)
         return badge
-    if ' 0 failing' not in output:
+    if '0 failing' not in output:
         badge = cache.get('failing')
         if badge is None:
             badge = requests.get(failing_badge())
@@ -91,7 +91,7 @@ def _badge_from_output(output):
             if badge.status_code == 200:
                 cache.set('warning', badge, timeout=BADGE_CACHE_TIMEOUT)
         return badge
-    if ' 0 failing, 0 errors' in output:
+    if '0 failing' in output and '0 errors' in output:
         badge = cache.get('passing')
         if badge is None:
             badge = requests.get(passing_badge())
